@@ -7,9 +7,10 @@ var SMS = require('./res/SMS_code');
 var regist = require('./res/registered');
 var zcreg = require('./res/zc/zc');
 var cr = require('./res/zc/cr');
-var dl = require('./res/dl/dl')
-var del = require('./res/del')
-var xgmm = require('./res/xgmm/xgmm')
+var dl = require('./res/dl/dl');
+var del = require('./res/del');
+var xgmm = require('./res/xgmm/xgmm');
+var xgpn = require('./res/xgpn/xgpn');
 /* GET home page. */
 var r_MSGFalse = {
   'code':'0',
@@ -59,7 +60,7 @@ router.post('/api/zc',multipartMiddleware,(req, res) => {
             console.log(req.body.SMS_Code)
             if(result==req.body.SMS_Code){
               console.log('开始插入')
-              let promise =  cr.regcr(req.body.phoneN,req.body.NewPassword, () =>{}).then((result) =>{
+              let promise =  cr.regcr(req.body.phoneN,req.body.Password, () =>{}).then((result) =>{
                   console.log('插入成功')
                   console.log(result)
                     if(result=='1'){
@@ -190,6 +191,63 @@ router.post('/api/xgmm',multipartMiddleware,(req, res) => {
                       if(result=='1'){
                         console.log('开始删除验证码')
                         let promise =  del.rdel(req.body.phoneN, () =>{}).then((result) =>{//删除验证码
+                              if(result=='1'){
+                                res.json(r_MSGTrue)
+                                res.end();
+                              }else{
+                                res.json(r_MSGFalse);
+                                res.end();
+                              }
+                          }).catch((error) => {
+                            console.log(error);
+                            res.json(r_MSGFalse);
+                            res.end();
+                          })
+                      }else{
+                        res.json(r_MSGFalse);
+                        res.end();
+                      }
+                   
+                }).catch((error) => {
+                    console.log(error);
+                    res.end();
+                })
+            }else{
+                res.json(r_MSGFalse)
+                res.end();
+            }
+        }).catch((error) => {
+            console.log(error);
+            res.end();
+        })
+  }else{
+          res.json(r_MSGFalse);
+          res.end();
+  }
+  
+  
+});
+router.post('/api/xgpn',multipartMiddleware,(req, res) => {
+        let r_MSGTrue = {
+          'code':'1',
+          'msg':'成功'
+        }
+    
+        let phoners = /^1[0-9]{10}$/
+  if(phoners.test(req.body.phoneN)){
+     console.log('开始对比验证码')
+      let promise = zcreg.regzc(req.body.NewPhoneN,req.body.SMS_Code, () =>{}).then((result) =>{//对比验证码
+            console.log(result)
+            // console.log(req.body)
+            // console.log(req.body.SMS_Code)
+            if(result==req.body.SMS_Code){
+              console.log('验证码匹配成功')
+                let promise = xgpn.xgpnr(req.body.phoneN,req.body.NewPhoneN, () =>{}).then((result) =>{//修改密码
+                  console.log('手机号码修改成功')
+                  console.log(result)
+                      if(result=='1'){
+                        console.log('开始删除验证码')
+                        let promise =  del.rdel(req.body.NewPhoneN, () =>{}).then((result) =>{//删除验证码
                               if(result=='1'){
                                 res.json(r_MSGTrue)
                                 res.end();
