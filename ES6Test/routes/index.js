@@ -12,6 +12,7 @@ var del = require('./res/del');
 var xgmm = require('./res/xgmm/xgmm');
 var xgpn = require('./res/xgpn/xgpn');
 var sczl = require('./res/sczl/sczl');
+var xgzl = require('./res/xg/xgzl');
 /* GET home page. */
 var r_MSGFalse = {
   'code':'0',
@@ -39,6 +40,9 @@ router.get('/api/xgpn', function(req, res) {
   res.send('hello word!');
 });
 router.get('/api/sczl', function(req, res) {
+  res.send('hello word!');
+});
+router.get('/api/xgzl', function(req, res) {
   res.send('hello word!');
 });
 // router.post('/zc',(req, res) => {
@@ -294,6 +298,7 @@ router.post('/api/sczl',multipartMiddleware,(req, res) => {
         'msg':'成功'
     }
     let phoners = /^1[0-9]{10}$/
+    console.log(req.body)
     console.log(req.body.phoneN)
     if(phoners.test(req.body.phoneN)){
             let promise = sczl.sczlr(req.body, () =>{}).then((result) =>{//修改密码
@@ -312,6 +317,36 @@ router.post('/api/sczl',multipartMiddleware,(req, res) => {
         res.end();
       }
 });
+router.post('/api/xgzl',multipartMiddleware,(req, res) => {
+      let r_MSGTrue = {
+        'code':'1',
+        'msg':'成功'
+    }
+    let phoners = /^1[0-9]{10}$/
+    console.log(req.body)
+    if(phoners.test(req.body.phoneN)&&req.body.Key!=''){
+      console.log(req.body.Key);
+            let promise = xgzl.xgzlr('IT_Test',req.body, () =>{}).then((result) =>{//修改密码
 
+              console.log(result)
+              if(result=='1'){
+                res.json(r_MSGTrue);
+                res.end();
+              }else{
+                res.json(r_MSGFalse);
+                res.end();
+              }
+              
+            }).catch((error) => {
+              console.log(error);
+              res.json(r_MSGFalse);
+              res.end();
+            })   
+        
+      }else{
+        res.json(r_MSGFalse);
+        res.end();
+      }
+});
 
 module.exports = router;
